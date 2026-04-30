@@ -82,4 +82,30 @@ No extra Python dependencies are required.
 1. Add the **“Anima Style Selector”** node to your workflow.
 2. Use the **◀ ▶** buttons or the **random** button to pick a style, or click **“Open Gallery”** for full search/sort/favourites.
 3. The node outputs the style author name as a string.
-4. Feed that string into your prompt – for example, combine it with a `CLIP Text Encode (Prompt)` node:
+4. Feed that string into your prompt – for example, combine it with a `CLIP Text Encode (Prompt)` node: masterpiece, best quality, by [your style string], …
+
+
+The Anima model will automatically recognise the style.
+
+5. (Optional) Load the workflow from `workflows/example.json` to see a complete setup.
+
+---
+
+## 🙏 Credits
+
+- Style database originally compiled by **[ThetaCursed](https://github.com/ThetaCursed)** –  
+https://thetacursed.github.io/Anima-Style-Explorer/
+
+- Database refinement, rating estimation (*Realistic / Cartoon / Cute*) and the custom node built by **XAV-Games** using a mix of neural models and a dedicated processing workflow.
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) – feel free to use, modify, and share.
+
+---
+
+<p align="center">
+If you find this useful, consider giving the repo a ⭐!
+</p>
