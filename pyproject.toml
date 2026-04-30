@@ -1,13 +1,13 @@
 [project]
 name = "comfyui-xav-anima-style-selector"
+version = "1.0.1"
 description = "ComfyUI nodes for quick and easy style selection for the Anima model"
-version = "1.0.0"
-license = { file = "LICENSE" }
+author = "XAV"
+license = {text = "MIT"}
 dependencies = []
 
 [project.urls]
 Repository = "https://github.com/XAV-Games/comfyui-xav-anima-style-selector"
-
 
 [tool.comfy]
 PublisherId = "xav"
