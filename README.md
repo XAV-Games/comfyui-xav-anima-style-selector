@@ -39,28 +39,28 @@ This custom node lets you visually browse, search, sort, and select a style from
 ### 🧩 The node in action
 
 <p align="center">
-  <img src="img/node-view.png" alt="Node view" width="600"/>
+  <img src="img/node-view.png" alt="Node view" width="100%"/>
 </p>
 
 ### 📊 Sort styles by Realistic / Cartoon / Cute
 
 <div align="center">
-  <img src="img/sorting-by-realistic.png" width="30%" alt="Sorting by Realistic"/>
-  <img src="img/sorting-by-cartoon.png" width="30%" alt="Sorting by Cartoon"/>
-  <img src="img/sorting-by-cute.png" width="30%" alt="Sorting by Cute"/>
+  <img src="img/sorting-by-realistic.png" width="100%" alt="Sorting by Realistic"/>
+  <img src="img/sorting-by-cartoon.png" width="100%" alt="Sorting by Cartoon"/>
+  <img src="img/sorting-by-cute.png" width="100%" alt="Sorting by Cute"/>
 </div>
 
 ### ⭐ Favorites & Lightbox preview
 
 <p align="center">
-  <img src="img/favorites.png" width="45%" alt="Favorites"/>
-  <img src="img/image-lightbox-preview.png" width="45%" alt="Lightbox preview"/>
+  <img src="img/favorites.png" width="100%" alt="Favorites"/>
+  <img src="img/image-lightbox-preview.png" width="100%" alt="Lightbox preview"/>
 </p>
 
 ### 🔧 Workflow example
 
 <p align="center">
-  <img src="img/usage-example.png" alt="Usage example" width="700"/>
+  <img src="img/usage-example.png" alt="Usage example" width="100%"/>
 </p>
 
 ---
