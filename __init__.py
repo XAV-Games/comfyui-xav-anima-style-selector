@@ -1,3 +1,4 @@
+NODE_ID = "comfyui-xav-anima-style-selector"
 WEB_DIRECTORY = "./js"
 
 from .nodes import (

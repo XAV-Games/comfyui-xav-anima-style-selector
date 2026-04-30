@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-xav-anima-style-selector"
+description = "ComfyUI nodes for quick and easy style selection for the Anima model"
+version = "1.0.0"
+license = { file = "LICENSE" }
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/XAV-Games/comfyui-xav-anima-style-selector"
+
+[tool.comfy]
+PublisherId = "xav"
+DisplayName = "XAV Anima Style Selector"
+Icon = "https://xav.su/favicon_io/android-chrome-512x512.png"
