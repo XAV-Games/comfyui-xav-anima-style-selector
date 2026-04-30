@@ -8,6 +8,7 @@ dependencies = []
 [project.urls]
 Repository = "https://github.com/XAV-Games/comfyui-xav-anima-style-selector"
 
+
 [tool.comfy]
 PublisherId = "xav"
 DisplayName = "XAV Anima Style Selector"
