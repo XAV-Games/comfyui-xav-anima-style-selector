@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAV Anima Gallery</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{--bg-primary:#0a0a0f;--bg-secondary:#12121a;--bg-card:#1a1a2e;--bg-card-hover:#222240;--accent:#7c5cfc;--accent-glow:rgba(124,92,252,0.35);--accent-secondary:#c084fc;--text-primary:#e8e6f0;--text-secondary:#8888a0;--text-muted:#55556a;--border:#2a2a3e;--danger:#f43f5e;--danger-glow:rgba(244,63,94,0.35);--radius:12px;--radius-sm:8px;--transition:0.25s cubic-bezier(0.4,0,0.2,1);--shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-lg:0 12px 48px rgba(0,0,0,0.6)}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+  .header{position:sticky;top:0;z-index:100;background:var(--bg-secondary);border-bottom:1px solid var(--border);backdrop-filter:blur(20px);padding:16px 70px}
+  .header-inner{max-width:1600px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .logo{font-size:22px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent-secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;white-space:nowrap}
+  .logo span{font-weight:400;opacity:0.7}
+  .search-box{flex:1;min-width:200px;max-width:350px;position:relative}
+  .search-box svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-muted);pointer-events:none}
+  .search-box input{width:100%;padding:10px 14px 10px 40px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:14px;outline:none;transition:var(--transition)}
+  .search-box input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+  .search-box input::placeholder{color:var(--text-muted)}
+  .sort-group{display:flex;gap:8px;flex-wrap:wrap}
+  .sort-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-primary);color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);user-select:none}
+  .sort-btn:hover{border-color:var(--accent);color:var(--text-primary)}
+  .sort-btn.active-1{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 12px var(--accent-glow)}
+  .sort-btn.active--1{background:var(--bg-card);border-color:var(--accent-secondary);color:var(--accent-secondary);box-shadow:0 0 12px rgba(192,132,252,0.2)}
+  .sort-arrow{font-size:14px;line-height:1;width:14px;text-align:center}
+  .btn-fav{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-primary);color:var(--text-primary);font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition);white-space:nowrap}
+  .btn-fav:hover{border-color:var(--accent);background:var(--bg-card)}
+  .btn-fav.active{background:var(--danger);border-color:var(--danger);color:#fff;box-shadow:0 0 16px var(--danger-glow)}
+  .btn-fav svg{width:16px;height:16px}
+  .header-stats{font-size:12px;color:var(--text-muted);margin-left:auto;white-space:nowrap}
+  .gallery-container{max-width:1600px;margin:0 auto;padding:20px 24px}
+  .gallery-grid{display:grid;gap:16px;justify-content:center}
+  .card{position:relative;border-radius:var(--radius);overflow:hidden;background:var(--bg-card);cursor:pointer;transition:var(--transition);aspect-ratio:200/300;border:1px solid var(--border);animation:fadeInUp 0.3s ease both}
+  .card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg),0 0 0 1px var(--accent);border-color:var(--accent)}
+  .card img{width:100%;height:100%;object-fit:cover;display:block;transition:var(--transition)}
+  .card:hover img{transform:scale(1.05)}
+  .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.85) 0%,rgba(0,0,0,0.2) 40%,transparent 100%);opacity:0;transition:var(--transition);display:flex;flex-direction:column;justify-content:flex-end;padding:14px}
+  .card:hover .card-overlay{opacity:1}
+  .card-name{font-size:13px;font-weight:600;color:#fff;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .card-id{font-size:11px;color:var(--text-secondary);margin-top:4px}
+  .card-fav-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);opacity:0;z-index:2}
+  .card:hover .card-fav-btn,.card-fav-btn.is-fav{opacity:1}
+  .card-fav-btn.is-fav{background:var(--danger);border-color:var(--danger)}
+  .card-fav-btn svg{width:16px;height:16px;color:#fff;transition:var(--transition)}
+  .card-fav-btn.is-fav svg{fill:#fff}
+  .card-fav-btn:hover{transform:scale(1.15)}
+  .pagination{display:flex;align-items:center;justify-content:center;gap:6px;padding:24px 20px 40px;flex-wrap:wrap}
+  .page-btn{min-width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-secondary);color:var(--text-secondary);font-size:14px;font-weight:500;cursor:pointer;transition:var(--transition)}
+  .page-btn:hover:not(.active):not(:disabled){border-color:var(--accent);color:var(--text-primary);background:var(--bg-card)}
+  .page-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 0 12px var(--accent-glow)}
+  .page-btn:disabled{opacity:0.3;cursor:not-allowed}
+  .page-ellipsis{color:var(--text-muted);padding:0 4px;user-select:none}
+  .lightbox{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.92);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;transition:0.3s ease}
+  .lightbox.open{opacity:1;visibility:visible}
+  .lightbox-content{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+  .lightbox-content img{max-width:100%;max-height:85vh;object-fit:contain;border-radius:var(--radius);box-shadow:var(--shadow-lg);opacity:0;transition:opacity 0.3s ease}
+  .lightbox.open .lightbox-content img{opacity:1}
+  .lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--transition);color:#fff;z-index:10}
+  .lightbox-nav:hover{background:var(--accent);border-color:var(--accent);transform:translateY(-50%) scale(1.1)}
+  .lightbox-nav svg{width:22px;height:22px}
+  .lightbox-prev{left:20px}.lightbox-next{right:20px}
+  .lightbox-info{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:12px 20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(12px);border-radius:var(--radius);border:1px solid rgba(255,255,255,0.1);z-index:10;white-space:nowrap}
+  .lightbox-title{font-size:14px;font-weight:600;color:#fff}
+  .lightbox-counter{font-size:13px;color:var(--text-secondary);padding:0 12px;border-left:1px solid rgba(255,255,255,0.15)}
+  .lightbox-actions{display:flex;gap:8px}
+  .lightbox-actions .btn{padding:8px 14px;font-size:13px;border-radius:var(--radius-sm)}
+  .loading-spinner,.empty-state{text-align:center;padding:80px 20px;color:var(--text-muted)}
+  .loading-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+  .spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  .empty-state svg{width:64px;height:64px;margin-bottom:16px;opacity:0.3}
+  .empty-state h3{font-size:18px;color:var(--text-secondary);margin-bottom:8px}
+  ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:var(--bg-primary)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+  @media(max-width:768px){.header-inner{gap:12px}.search-box{order:10;flex-basis:100%;max-width:100%}.gallery-container{padding:12px}.gallery-grid{gap:10px}.lightbox-info{bottom:10px;flex-wrap:wrap;justify-content:center;max-width:90vw}}
+</style>
+</head>
+<body>
+
+<header class="header" id="header" >
+  <div class="header-inner">
+    <div class="logo">XAV Anima Gallery</div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="searchInput" placeholder="Search by name...">
+    </div>
+    <div class="sort-group">
+      <button class="sort-btn" data-key="realistic"><span class="sort-label">Realistic</span><span class="sort-arrow">-</span></button>
+      <button class="sort-btn" data-key="cartoon"><span class="sort-label">Cartoon</span><span class="sort-arrow">-</span></button>
+      <button class="sort-btn" data-key="cute"><span class="sort-label">Cute</span><span class="sort-arrow">-</span></button>
+    </div>
+    <button class="btn-fav" id="favToggle" title="Favorites">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      <span>Favorites</span>
+    </button>
+    <div class="header-stats" id="headerStats"></div>
+  </div>
+</header>
+
+<main class="gallery-container">
+  <div class="gallery-grid" id="galleryGrid"></div>
+  <div id="loadingState" class="loading-spinner"><div class="spinner"></div><span>Loading data...</span></div>
+  <div id="emptyState" class="empty-state" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+    <h3>Nothing found</h3><p>Try changing your search parameters or filters.</p>
+  </div>
+</main>
+
+<div class="pagination" id="pagination"></div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-content">
+    <button class="lightbox-nav lightbox-prev" id="lbPrev" title="Prev (←)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+    <img id="lbImage" src="" alt="">
+    <button class="lightbox-nav lightbox-next" id="lbNext" title="Next (→)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    <div class="lightbox-info">
+      <span class="lightbox-title" id="lbTitle"></span>
+      <span class="lightbox-counter" id="lbCounter"></span>
+      <div class="lightbox-actions">
+        <button class="btn btn-fav" id="lbFavBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span id="lbFavText">Add to favorites</span></button>
+        <button class="btn btn-fav" id="lbSelectBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>Select</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ===== CONFIG =====
+  const THUMB_W = 200;
+  const THUMB_H = 300;
+  const GAP = 16;
+  const IMG_BASE = 'https://raw.githubusercontent.com/ThetaCursed/Anima-Style-Explorer/main/images';
+  const STATE_KEY = 'artgallery_state';
+  const FAV_KEY = 'artgallery_favorites';
+  const SORT_CACHE_PREFIX = 'artgallery_sort_';
+  const SORT_KEYS = ['realistic', 'cartoon', 'cute'];
+
+  // ===== STATE =====
+  let allData = [];
+  let filteredData = [];
+  let currentPage = 1;
+  let itemsPerPage = 1;
+  let colsCount = 1;
+  let showFavorites = false;
+  let favorites = new Set();
+  let lightboxIndex = -1;
+  let sortStates = { realistic: 0, cartoon: 0, cute: 0 };
+  let precalcSortCache = {};
+
+  // ===== DOM =====
+  const $grid = document.getElementById('galleryGrid');
+  const $pagination = document.getElementById('pagination');
+  const $search = document.getElementById('searchInput');
+  const $favToggle = document.getElementById('favToggle');
+  const $header = document.getElementById('header');
+  const $stats = document.getElementById('headerStats');
+  const $loading = document.getElementById('loadingState');
+  const $empty = document.getElementById('emptyState');
+  const $lightbox = document.getElementById('lightbox');
+  const $lbImage = document.getElementById('lbImage');
+  const $lbTitle = document.getElementById('lbTitle');
+  const $lbCounter = document.getElementById('lbCounter');
+  const $lbFavBtn = document.getElementById('lbFavBtn');
+  const $lbFavText = document.getElementById('lbFavText');
+  const $lbSelectBtn = document.getElementById('lbSelectBtn');
+  const $sortBtns = document.querySelectorAll('.sort-btn');
+
+  // ===== INIT =====
+  function init() {
+    loadFavorites();
+    loadState();
+    updateSortButtonsUI();
+    loadData();
+    setupEvents();
+    onResize();
+  }
+
+  function loadFavorites() {
+    try { favorites = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); } catch(e) { favorites = new Set(); }
+  }
+  function saveFavorites() { localStorage.setItem(FAV_KEY, JSON.stringify([...favorites])); }
+
+  function loadState() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+      if (s.search) $search.value = s.search;
+      if (s.currentPage) currentPage = s.currentPage;
+      if (typeof s.showFavorites === 'boolean') showFavorites = s.showFavorites;
+      if (s.sortStates) sortStates = { ...sortStates, ...s.sortStates };
+    } catch(e) {}
+  }
+  function saveState() {
+    localStorage.setItem(STATE_KEY, JSON.stringify({ search: $search.value, currentPage, showFavorites, sortStates }));
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch('data.json');
+      if (!res.ok) throw new Error('Network error');
+      allData = await res.json();
+      $loading.style.display = 'none';
+      applyFilters();
+    } catch(e) {
+      $loading.innerHTML = `<div class="loading-spinner"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--danger)"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg><span>Loading error data.json</span></div>`;
+    }
+  }
+
+  // ===== SORTING & CACHING =====
+  function getSortKey() { return `${sortStates.realistic}_${sortStates.cartoon}_${sortStates.cute}`; }
+
+  function getSortedIndices() {
+    const key = getSortKey();
+    if (precalcSortCache[key]) return precalcSortCache[key];
+    try {
+      const cached = JSON.parse(localStorage.getItem(SORT_CACHE_PREFIX + key) || 'null');
+      if (Array.isArray(cached) && cached.length === allData.length) { precalcSortCache[key] = cached; return cached; }
+    } catch(e) {}
+    const scores = allData.map((item, i) => ({
+      index: i,
+      score: (Number(item.realistic) || 0) * sortStates.realistic + (Number(item.cartoon) || 0) * sortStates.cartoon + (Number(item.cute) || 0) * sortStates.cute
+    }));
+    if (sortStates.realistic === 0 && sortStates.cartoon === 0 && sortStates.cute === 0) {
+      precalcSortCache[key] = scores.map(s => s.index);
+    } else {
+      scores.sort((a, b) => b.score - a.score);
+      precalcSortCache[key] = scores.map(s => s.index);
+    }
+    try { localStorage.setItem(SORT_CACHE_PREFIX + key, JSON.stringify(precalcSortCache[key])); } catch(e) { console.warn('Sort cache not saved'); }
+    return precalcSortCache[key];
+  }
+
+  // ===== CALCULATE ITEMS PER PAGE (FIXED) =====
+  function calculateItemsPerPage() {
+    const gridWidth = window.innerWidth - 48;
+    colsCount = Math.max(1, Math.floor((gridWidth + GAP) / (THUMB_W + GAP)));
+    const gridH = window.innerHeight - 80 - $header.clientHeight - $pagination.clientHeight;
+    const rowsCount = Math.max(1, Math.floor((gridH + GAP) / (THUMB_H + GAP)));
+    itemsPerPage = colsCount * rowsCount;
+    return colsCount;
+  }
+
+  // ===== FILTERS & RENDER =====
+  function applyFilters() {
+    const query = $search.value.trim().toLowerCase();
+    const sortedIndices = getSortedIndices();
+    let workingData = sortedIndices.map(i => allData[i]);
+    if (showFavorites) workingData = workingData.filter(item => favorites.has(String(item.id)));
+    if (query) workingData = workingData.filter(item => item.name && item.name.toLowerCase().includes(query));
+    filteredData = workingData;
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    currentPage = Math.max(1, Math.min(currentPage, totalPages));
+    render();
+    saveState();
+  }
+
+  function getImageUrl(item, isLarge = false) {
+    // Единая схема для всех изображений
+    const p = String(item.p || 1);
+    const id = String(item.id);
+    return `${IMG_BASE}/${p}/${id}.webp`;
+  }
+
+  function render() {
+    const cols = calculateItemsPerPage();
+    $grid.style.gridTemplateColumns = `repeat(${cols}, ${THUMB_W}px)`;
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    const start = (currentPage - 1) * itemsPerPage;
+    const pageItems = filteredData.slice(start, start + itemsPerPage);
+    $stats.textContent = `${filteredData.length.toLocaleString()} из ${allData.length.toLocaleString()} артов`;
+    $favToggle.classList.toggle('active', showFavorites);
+    if (filteredData.length === 0) { $grid.innerHTML = ''; $empty.style.display = 'block'; $pagination.innerHTML = ''; return; }
+    $empty.style.display = 'none';
+    $grid.innerHTML = pageItems.map((item, i) => {
+      const globalIndex = start + i;
+      const isFav = favorites.has(String(item.id));
+      const imgUrl = getImageUrl(item);
+      return `
+        <div class="card" data-index="${globalIndex}" data-id="${item.id}">
+          <img src="${imgUrl}" alt="${escapeHtml(item.name)}" loading="lazy">
+          <button class="card-fav-btn ${isFav ? 'is-fav' : ''}" data-id="${item.id}" title="Add to favorites">
+            <svg viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <div class="card-overlay">
+            <div class="card-name">${escapeHtml(item.name)}</div>
+            <div class="card-id">ID: ${item.id}</div>
+          </div>
+        </div>`;
+    }).join('');
+    renderPagination(totalPages);
+  }
+
+  // ===== PAGINATION WITH MIDPOINTS =====
+  function renderPagination(totalPages) {
+    if (totalPages <= 1) { $pagination.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="window._goPage(${currentPage - 1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>`;
+    const range = getPageRange(currentPage, totalPages);
+    range.forEach(p => html += p === '...' ? `<span class="page-ellipsis">…</span>` : `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="window._goPage(${p})">${p}</button>`);
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="window._goPage(${currentPage + 1})"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>`;
+    $pagination.innerHTML = html;
+  }
+
+  function getPageRange(current, total) {
+    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    const pages = new Set([1, current, total]);
+    if (current > 1) pages.add(current - 1);
+    if (current < total) pages.add(current + 1);
+    if (current > 2) pages.add(Math.floor((1 + current) / 2));
+    if (current < total - 1) pages.add(Math.floor((current + total) / 2));
+    const sorted = [...pages].filter(p => p >= 1 && p <= total).sort((a, b) => a - b);
+    const result = [];
+    for (let i = 0; i < sorted.length; i++) {
+      if (i > 0 && sorted[i] - sorted[i-1] > 1) result.push('...');
+      result.push(sorted[i]);
+    }
+    return result;
+  }
+
+  // ===== LIGHTBOX =====
+  function openLightbox(index) {
+    lightboxIndex = index; updateLightbox();
+    $lightbox.classList.add('open'); document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() { $lightbox.classList.remove('open'); document.body.style.overflow = ''; }
+  function updateLightbox() {
+    const item = filteredData[lightboxIndex]; if (!item) return;
+    $lbImage.src = getImageUrl(item, true); // same URL scheme
+    $lbTitle.textContent = item.name; $lbCounter.textContent = `${lightboxIndex + 1} / ${filteredData.length}`;
+    const isFav = favorites.has(String(item.id));
+    $lbFavBtn.classList.toggle('active', isFav); $lbFavText.textContent = isFav ? 'In favorites' : 'Add to favorites';
+  }
+
+  // ===== FAVORITES =====
+  function toggleFav(id) {
+    id = String(id);
+    if (favorites.has(id)) favorites.delete(id); else favorites.add(id);
+    saveFavorites();
+    if (showFavorites && !favorites.has(id)) { applyFilters(); return; }
+    render();
+    if ($lightbox.classList.contains('open')) updateLightbox();
+  }
+
+  function goToPage(page) {
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage) || 1;
+    if (page < 1 || page > totalPages) return;
+    currentPage = page; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); saveState();
+  }
+
+  function updateSortButtonsUI() {
+    $sortBtns.forEach(btn => {
+      const key = btn.dataset.key;
+      const val = sortStates[key];
+      const arrow = btn.querySelector('.sort-arrow');
+      btn.classList.remove('active-1', 'active--1');
+      if (val === 1) { btn.classList.add('active-1'); arrow.textContent = '▼'; }
+      else if (val === -1) { btn.classList.add('active--1'); arrow.textContent = '▲'; }
+      else arrow.textContent = '-';
+    });
+  }
+
+  // ===== EVENTS =====
+  function setupEvents() {
+    let debounce;
+    $search.addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(applyFilters, 300); });
+    $favToggle.addEventListener('click', () => { showFavorites = !showFavorites; applyFilters(); });
+    $grid.addEventListener('click', (e) => {
+      const favBtn = e.target.closest('.card-fav-btn');
+      if (favBtn) { e.stopPropagation(); toggleFav(favBtn.dataset.id); return; }
+      const card = e.target.closest('.card');
+      if (card) openLightbox(parseInt(card.dataset.index));
+    });
+    $sortBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        sortStates[key] = sortStates[key] === 0 ? 1 : sortStates[key] === 1 ? -1 : 0;
+        updateSortButtonsUI();
+        applyFilters();
+      });
+    });
+    document.getElementById('lbPrev').addEventListener('click', () => { if (lightboxIndex > 0) { lightboxIndex--; updateLightbox(); } });
+    document.getElementById('lbNext').addEventListener('click', () => { if (lightboxIndex < filteredData.length - 1) { lightboxIndex++; updateLightbox(); } });
+    $lbFavBtn.addEventListener('click', () => { const item = filteredData[lightboxIndex]; if (item) toggleFav(item.id); });
+	
+    $lbSelectBtn.addEventListener('click', () => { 
+		const item = filteredData[lightboxIndex];
+		if (item) {
+			window.parent.postMessage({ type: "iframeSelection", value: item.id });
+		}
+	});
+	
+    $lightbox.addEventListener('click', e => { if (e.target === $lightbox || e.target.classList.contains('lightbox-content')) closeLightbox(); });
+    document.addEventListener('keydown', e => {
+      if (!$lightbox.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') document.getElementById('lbPrev').click();
+      if (e.key === 'ArrowRight') document.getElementById('lbNext').click();
+    });
+    let touchStartX = 0;
+    $lightbox.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX, { passive: true });
+    $lightbox.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].screenX - touchStartX;
+      if (Math.abs(diff) > 60) document.getElementById(diff > 0 ? 'lbPrev' : 'lbNext').click();
+    }, { passive: true });
+    window.addEventListener('resize', () => onResize());
+  }
+
+  function onResize() { if (allData.length > 0) render(); }
+  function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+  window._goPage = goToPage;
+  init();
+})();
+</script>
+</body>
+</html>
